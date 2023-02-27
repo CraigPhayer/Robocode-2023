@@ -1,8 +1,10 @@
 package Bots;
 
 import robocode.*;
+import static robocode.util.Utils.normalRelativeAngle;
 
 import java.awt.*;
+import java.util.Random;
 
 public class MyBot extends AdvancedRobot {
     private int moveDir = 1;
@@ -27,29 +29,41 @@ public class MyBot extends AdvancedRobot {
 
     public void onScannedRobot(ScannedRobotEvent event) {
         double absBearing = event.getBearingRadians() + getHeadingRadians();//Enemy absolute bearing
-        double latVel=event.getVelocity() * Math.sin(event.getHeadingRadians() -absBearing);//enemies lateral Vel.
+        double latVel = event.getVelocity() * Math.sin(event.getHeadingRadians() - absBearing);//enemies lateral Vel.
 
-        
         setTurnRadarLeftRadians(getRadarTurnRemainingRadians());//Radar lock
+        setMaxVelocity((12 * Math.random()) + 12);
 
         //Arena wall detection
         if (getBattleFieldWidth() - getX() == 20 || getBattleFieldHeight() - getY() == 20) {
             //Alter direction
             moveDir *= -1;
             setAhead(100 * moveDir);
-
-            // always square off against our enemy
-            setTurnLeft(-90-event.getBearing());
-
-            // strafe by changing direction every 20 ticks
-        }
-        if (getTime() % 20 == 0) {
-            moveDir *= -1;
-            setAhead(150 * -moveDir);
         }
 
-        if (event.getDistance() == 30) {
-            moveDir = -moveDir;
+        double gun;//Time to set how much we need to turn our gun and give lead
+        if (event.getDistance() > 150) {
+            gun = normalRelativeAngle(absBearing - getGunHeadingRadians()+latVel/22);
+            setTurnGunRightRadians(gun); //turn our gun
+            setTurnRightRadians(robocode.util.Utils.normalRelativeAngle(absBearing-getHeadingRadians()+latVel/getVelocity()));//drive towards the enemies predicted future location
+            setAhead((event.getDistance() - 130)*moveDir);
+            setFire(3);
+
+        } else /*if (event.getDistance() <= 10)*/ {//Too close to enemy
+            //moveDir = -moveDir;
+            gun = normalRelativeAngle(absBearing - getGunHeadingRadians()+latVel/12);
+            setTurnGunRightRadians(gun); //turn our gun
+            setTurnLeft(-90 - event.getBearing());
+            setAhead((event.getDistance() - 140)*moveDir);
+            setFire(3);
+
+            /*// strafe by changing direction every "randomInt" ticks
+            Random rand = new Random();
+            int randomInt = rand.nextInt(21) + 5;
+            if (getTime() % randomInt == 0) {
+                //moveDir *= -1;
+                setAhead(150 * -moveDir);
+            }*/
         }
 
     }
