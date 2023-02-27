@@ -8,6 +8,7 @@ import java.util.Random;
 
 public class MyBot extends AdvancedRobot {
     private int moveDir = 1;
+    private boolean win = true;
     private double enemyNRG;
 
     public void run() {
@@ -70,5 +71,15 @@ public class MyBot extends AdvancedRobot {
 
     public void onHitWall(HitWallEvent event) {
         moveDir = -moveDir;
+    }
+
+    public void onWin(WinEvent event){
+
+        while (win){
+            turnLeft(5);
+            setAhead(20);
+            turnRight(5);
+            setAhead(-20);
+        }
     }
 }
