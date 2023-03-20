@@ -1,13 +1,13 @@
 package Bots;
 
 import robocode.*;
+
 import static robocode.util.Utils.normalRelativeAngle;
 
 import java.awt.*;
-import java.util.Random;
 
-public class MyBot extends AdvancedRobot {
-    private int moveDir = 1;
+public class Bot21340633 extends AdvancedRobot {
+    private int direction = 1;
     private boolean win = true;
     private double enemyNRG;
 
@@ -25,6 +25,25 @@ public class MyBot extends AdvancedRobot {
 
         //Gun
         setAdjustGunForRobotTurn(true);//Keep gun Static while we turn
+        while (true) {
+            if (Math.random() > .5) {
+                setMaxVelocity((12 * Math.random()) + 12);
+            }
+
+            /*if (getVelocity() == 0){
+                inactive();
+            }*/
+            setTurnRight(10000);
+            setMaxVelocity(5);
+            ahead(10000);
+
+            //Arena wall detection
+            if (getX() > getBattleFieldWidth() - 100 || getX() > getBattleFieldHeight() - 100
+                    || getY() > getBattleFieldWidth() - 100 || getY() > getBattleFieldHeight() - 100) {
+                //Alter direction
+                direction *= -1;
+            }
+        }
 
     }
 
@@ -33,51 +52,54 @@ public class MyBot extends AdvancedRobot {
         double latVel = event.getVelocity() * Math.sin(event.getHeadingRadians() - absBearing);//enemies lateral Vel.
 
 
-        //Arena wall detection
-        if (getBattleFieldWidth() - getX() == 20 || getBattleFieldHeight() - getY() == 20) {
-            //Alter direction
-            moveDir *= -1;
-            setAhead(100 * moveDir);
+        double gun;//Time to set how much we need to turn our gun and give lead
+
+        //set random vel.
+        if (Math.random() > .5) {
+            setMaxVelocity((12 * Math.random()) + 12);
         }
 
-        double gun;//Time to set how much we need to turn our gun and give lead
-        if (event.getEnergy() < 300) {//Not a turret
+        if (event.getEnergy() > 175) {
+            setAhead(-90 - event.getBearing());
+        }
+
+        if (event.getEnergy() < 175) {//Not a turret
             setTurnRadarLeftRadians(getRadarTurnRemainingRadians());//Radar lock
-            setMaxVelocity((12 * Math.random()) + 12);
             if (event.getDistance() > 150) {
                 gun = normalRelativeAngle(absBearing - getGunHeadingRadians() + latVel / 22);
                 setTurnGunRightRadians(gun); //turn our gun
                 setTurnRightRadians(robocode.util.Utils.normalRelativeAngle(absBearing - getHeadingRadians() + latVel / getVelocity()));//drive towards the enemies predicted future location
-                setAhead((event.getDistance() - 130) * moveDir);
+                setAhead((event.getDistance() - 100) * direction);
                 setFire(3);
 
-            } else /*if (event.getDistance() <= 10)*/ {//Too close to enemy
+            } else /*if (event.getDistance() <= 25 && getEnergy() > 85)*/ {//Too close to enemy
                 //moveDir = -moveDir;
                 gun = normalRelativeAngle(absBearing - getGunHeadingRadians() + latVel / 12);
                 setTurnGunRightRadians(gun); //turn our gun
                 setTurnLeft(-90 - event.getBearing());
-                setAhead((event.getDistance() - 140) * moveDir);
+                setAhead((event.getDistance() - 140) * direction);
                 setFire(3);
-
-            /*// strafe by changing direction every "randomInt" ticks
-            Random rand = new Random();
-            int randomInt = rand.nextInt(21) + 5;
-            if (getTime() % randomInt == 0) {
-                //moveDir *= -1;
-                setAhead(150 * -moveDir);
-            }*/
             }
+        }
+    }
+
+
+    public void inactive() {
+        while (true){
+            setTurnRight(10000);
+            setMaxVelocity(5);
+            ahead(10000);
         }
 
     }
 
     public void onHitWall(HitWallEvent event) {
-        moveDir = -moveDir;
+        direction *= -1;
     }
 
-    public void onWin(WinEvent event){
+    public void onWin(WinEvent event) {
 
-        while (win){
+        while (win) {
             turnLeft(5);
             setAhead(20);
             turnRight(5);
@@ -85,3 +107,11 @@ public class MyBot extends AdvancedRobot {
         }
     }
 }
+
+/*// strafe by changing direction every "randomInt" ticks
+            Random rand = new Random();
+            int randomInt = rand.nextInt(21) + 5;
+            if (getTime() % randomInt == 0) {
+                //moveDir *= -1;
+                setAhead(150 * -moveDir);
+            }*/
