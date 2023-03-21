@@ -4,18 +4,20 @@ import robocode.*;
 
 import static robocode.util.Utils.normalRelativeAngle;
 
- import java.awt.*;
+import java.awt.*;
+import java.util.ArrayList;
 
 public class Bot21340633 extends AdvancedRobot {
     private int direction = 1;
     private boolean win = true;
     private double enemyNRG;
-    private double POWER = 1.85;
+    private double POWER = .1;
     private int hitCount = 0;
     private int missCount = 0;
 
+    private ArrayList<Double> energyHistory = new ArrayList<>();
+
     public void run() {
-        //inactive();
         //Radar
         setAdjustRadarForRobotTurn(true);//keep the radar still while we turn
         turnRadarRightRadians(Double.POSITIVE_INFINITY);
@@ -29,6 +31,7 @@ public class Bot21340633 extends AdvancedRobot {
 
         //Gun
         setAdjustGunForRobotTurn(true);//Keep gun Static while we turn
+
         while (true) {
             if (Math.random() > .5) {
                 setMaxVelocity((12 * Math.random()) + 12);
@@ -54,9 +57,10 @@ public class Bot21340633 extends AdvancedRobot {
     public void onScannedRobot(ScannedRobotEvent event) {
         double absBearing = event.getBearingRadians() + getHeadingRadians();//Enemy absolute bearing
         double latVel = event.getVelocity() * Math.sin(event.getHeadingRadians() - absBearing);//enemies lateral Vel.
-
-
         double gun;//Time to set how much we need to turn our gun and give lead
+
+        // Update energy history with current energy level
+        energyHistory.add(getEnergy());
 
         //set random vel.
         if (Math.random() > .5) {
@@ -106,19 +110,36 @@ public class Bot21340633 extends AdvancedRobot {
 
     }
 
-    public void onHitRobot(HitRobotEvent event) {
-        if (event.isMyFault()) {
-            hitCount++;
-            missCount = 0;
-        } else if (missCount > 3)
-            POWER = .1;
+    public void onBulletHit(BulletHitEvent event) {
+        int index = energyHistory.size() - 5;
+        hitCount++;
+            /*for (int i = 0; i < 10; i++) {
+                energyHistory.add(getEnergy());
+            }*/
+        energyHistory.add(getEnergy());
 
-        if (hitCount >= 4) {
+        if (hitCount>3){
+            POWER = 3;
+        }
+        if (energyHistory.get(index) > getEnergy()){
+            POWER = 1.5;
+            hitCount = 0;
+        }
+
+        /*if (energyHistory.get(index) > getEnergy() - 10 && energyHistory.get(index) < getEnergy()) {
+            POWER = .1;
+            hitCount = 0;
+        }*/
+        /*if (event.getBullet().isActive()) {
             POWER = 3;
             if (event.getEnergy() < 10) {
                 POWER = 2;
             }
-        }
+        }*/
+    }
+
+    public void onHitRobot(HitRobotEvent event) {
+
     }
 
     public void onWin(WinEvent event) {
