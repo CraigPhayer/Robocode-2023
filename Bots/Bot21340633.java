@@ -1,11 +1,13 @@
 package Bots;
 
+import org.apache.bcel.generic.IF_ACMPEQ;
 import robocode.*;
 
 import static robocode.util.Utils.normalRelativeAngle;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Bot21340633 extends AdvancedRobot {
     private int direction = 1;
@@ -14,6 +16,7 @@ public class Bot21340633 extends AdvancedRobot {
     private double POWER = .1;
     private int hitCount = 0;
     private int missCount = 0;
+    private int hits;
 
     private ArrayList<Double> energyHistory = new ArrayList<>();
 
@@ -107,8 +110,13 @@ public class Bot21340633 extends AdvancedRobot {
     }
 
     public void onHitByBullet(HitByBulletEvent event) {
+        hits++;
 
+        if (hits >= 2) {
+            strafe();
+        }
     }
+
 
     public void onBulletHit(BulletHitEvent event) {
         int index = energyHistory.size() - 5;
@@ -137,6 +145,13 @@ public class Bot21340633 extends AdvancedRobot {
         }*/
     }
 
+    public void onBulletMissed(BulletMissedEvent event){
+        missCount++;
+        if (missCount % 2 == 1){
+            POWER = .1;
+        }
+    }
+
     public void onRobotDeath(RobotDeathEvent event) {
         POWER = .1;
     }
@@ -155,12 +170,21 @@ public class Bot21340633 extends AdvancedRobot {
             setAhead(-20);
         }
     }
+
+    public void strafe() {// strafe by changing direction every "randomInt" ticks
+        Random rand = new Random();
+        int randomInt = rand.nextInt(21) + 5;
+        if (getTime() % randomInt == 0) {
+            direction *= -1;
+            setAhead(150 * -direction);
+        }
+    }
 }
 
 /*// strafe by changing direction every "randomInt" ticks
             Random rand = new Random();
             int randomInt = rand.nextInt(21) + 5;
             if (getTime() % randomInt == 0) {
-                //moveDir *= -1;
+                moveDir *= -1;
                 setAhead(150 * -moveDir);
             }*/
