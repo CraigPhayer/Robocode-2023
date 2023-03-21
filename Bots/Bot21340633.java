@@ -113,17 +113,16 @@ public class Bot21340633 extends AdvancedRobot {
     public void onBulletHit(BulletHitEvent event) {
         int index = energyHistory.size() - 5;
         hitCount++;
-            /*for (int i = 0; i < 10; i++) {
-                energyHistory.add(getEnergy());
-            }*/
-        energyHistory.add(getEnergy());
+        if (event.getEnergy() > 10) {
+            energyHistory.add(getEnergy());
 
-        if (hitCount>3){
-            POWER = 3;
-        }
-        if (energyHistory.get(index) > getEnergy()){
-            POWER = 1.5;
-            hitCount = 0;
+            if (hitCount > 3) {
+                POWER = 3;
+            }
+            if (energyHistory.get(index) > getEnergy()) {
+                POWER = .1;
+                hitCount = 0;
+            }
         }
 
         /*if (energyHistory.get(index) > getEnergy() - 10 && energyHistory.get(index) < getEnergy()) {
@@ -138,8 +137,13 @@ public class Bot21340633 extends AdvancedRobot {
         }*/
     }
 
-    public void onHitRobot(HitRobotEvent event) {
+    public void onRobotDeath(RobotDeathEvent event) {
+        POWER = .1;
+    }
 
+    public void onHitRobot(HitRobotEvent event) {
+        direction *= -1;
+        setAhead(100);
     }
 
     public void onWin(WinEvent event) {
