@@ -1,6 +1,5 @@
 package Bots;
 
-import org.apache.bcel.generic.IF_ACMPEQ;
 import robocode.*;
 
 import static robocode.util.Utils.normalRelativeAngle;
@@ -9,7 +8,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Bot21340633 extends AdvancedRobot {
+public class _21340633_CraigPhayer extends AdvancedRobot {
     private int direction = 1;
     private boolean win = true;
     private double enemyNRG;
@@ -70,11 +69,9 @@ public class Bot21340633 extends AdvancedRobot {
             setMaxVelocity((12 * Math.random()) + 12);
         }
 
-        if (event.getEnergy() > 175) {
+        if (event.isSentryRobot()) {
             setAhead(-90 - event.getBearing());
-        }
-
-        if (event.getEnergy() < 175) {//Not a turret
+        } else {//Not a turret
             setTurnRadarLeftRadians(getRadarTurnRemainingRadians());//Radar lock
             if (event.getDistance() > 150) {
                 gun = normalRelativeAngle(absBearing - getGunHeadingRadians() + latVel / 22);
@@ -107,6 +104,16 @@ public class Bot21340633 extends AdvancedRobot {
 
     public void onHitWall(HitWallEvent event) {
         direction *= -1;
+    }
+
+    public void onBulletHitBullet(BulletHitBulletEvent event) {
+        strafe();
+
+        if (getEnergy() > 30) {
+            POWER++;
+        } else {
+
+        }
     }
 
     public void onHitByBullet(HitByBulletEvent event) {
@@ -145,9 +152,9 @@ public class Bot21340633 extends AdvancedRobot {
         }*/
     }
 
-    public void onBulletMissed(BulletMissedEvent event){
+    public void onBulletMissed(BulletMissedEvent event) {
         missCount++;
-        if (missCount % 2 == 1){
+        if (missCount % 2 == 1) {
             POWER = .1;
         }
     }
